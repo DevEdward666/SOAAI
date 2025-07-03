@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",         // ⬅️ Change this from "CommonJS" to "ESNext"
+    "target": "ES2020",         // ES2020+ supports top-level await
+    "moduleResolution": "node",
+    "lib": ["ES2020"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
+    "strict": true,
+    "resolveJsonModule": true
+  },
+  "include": ["index.ts"]
+}

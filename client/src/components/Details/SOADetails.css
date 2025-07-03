@@ -1,0 +1,20 @@
+.btn-container-row{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding: 5px;
+}
+
+.__btn{
+    width: 100%;
+}
+
+.btn-footer{
+    background-color: white;
+}
+.checkbox-container-row{
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    gap: 8px;
+}
