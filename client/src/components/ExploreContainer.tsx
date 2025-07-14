@@ -4,7 +4,7 @@ import Tesseract from "tesseract.js";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 import { convertPDFModel } from "../models/user.model";
-import { ListOfSOADetails, SOADetails } from "../interface/SOADetailsInterface";
+import { ListOfSOADetails, PieChartSOAData, SOADetails } from "../interface/SOADetailsInterface";
 import {
   IonFab,
   IonFabButton,
@@ -60,10 +60,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfJSWorkerURL;
 import { useHistory } from "react-router-dom";
 import SegmentComponent from "./Segment/SegmentComponent";
 import SkeletonComponent from "./Skeleton/SkeletonComponent";
+import SpendingChart from "./SpendingChart/SpendingChart";
 const ExploreContainer: React.FC = () => {
   const { showModal, hideModal } = useModal();
   const { db, userId, loading, error } = useFirebase();
   const [segmentValue, setSegmentValue] = useState("pending");
+  const [spendingData, setSpendingData] = useState<PieChartSOAData>({ data: [],ChartTitle:"" });
 
   const [showPassword, setShowPassword] = useState(false);
   const handleShowPassword = useCallback(() => {
@@ -91,7 +93,6 @@ const ExploreContainer: React.FC = () => {
     const [parsedData, setParsedData] = useState<ListOfSOADetails | null>();
     const [loading, setLoading] = useState(false);
     const [authLoading, setAuthLoading] = useState(false);
-
     const { uploadPDF } = useAuth();
     const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState<boolean>(false);
@@ -346,12 +347,31 @@ const ExploreContainer: React.FC = () => {
     { label: "Pending", value: "pending" },
     { label: "Paid", value: "paid" },
   ];
+  
+useEffect(() => {
+  if (!soaList) return;
+
+  const grouped: { [category: string]: number } = {};
+
+  soaList.forEach((item) => {
+    const category = item.bank_name ?? 'Others';
+    grouped[category] = (grouped[category] || 0) + parseFloat(item.statement_balance.toString().replace(/,/g, ""));
+  });
+
+  const chartData = Object.entries(grouped).map(([category, amount]) => ({
+    category,
+    amount,
+  }));
+
+  setSpendingData({ data: chartData,ChartTitle:"Spendings by bank" });
+}, [soaList]);
   return (
     <IonContent>
          <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
       <div className="p-4 max-w-xl mx-auto">
+      <SpendingChart data={spendingData.data!} ChartTitle={spendingData.ChartTitle} />
         <SegmentComponent
           options={segmentOptions}
           selected={segmentValue}
@@ -406,12 +426,13 @@ const ExploreContainer: React.FC = () => {
           </IonSegmentContent>
         </IonSegmentView>
 
-        <IonFab slot="fixed" vertical="bottom" horizontal="end">
+       
+      </div>
+      <IonFab slot="fixed" vertical="bottom" horizontal="end">
           <IonFabButton onClick={handleOpenModal}>
             <IonIcon icon={add}></IonIcon>
           </IonFabButton>
         </IonFab>
-      </div>
     </IonContent>
   );
 };

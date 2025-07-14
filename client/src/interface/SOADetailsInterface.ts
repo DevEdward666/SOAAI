@@ -12,8 +12,13 @@ export interface SOADetails {
     statement_balance:string;
     previous_balance:string;
     paid?:boolean;
+    added_to_calendar?:boolean;
 }
 
 export interface ListOfSOADetails {
     data:SOADetails;
+}
+export interface PieChartSOAData {
+    data: { category: string; amount: number }[];
+    ChartTitle:string;
 }

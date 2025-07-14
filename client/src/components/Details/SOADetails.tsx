@@ -15,12 +15,15 @@ import {
   IonFooter,
   IonSpinner,
   IonCheckbox,
+  useIonToast,
 } from "@ionic/react";
 import { SOADetails } from "../../interface/SOADetailsInterface";
 import { useHistory, useLocation } from "react-router-dom";
 import CurrencyInput from "../../helpers/CurrencyInput";
 import {
   arrowBack,
+  calendarClear,
+  calendarClearOutline,
   close,
   closeCircle,
   save,
@@ -31,6 +34,12 @@ import "./SOADetails.css";
 import { doc, Firestore, updateDoc, deleteDoc } from "@firebase/firestore";
 import { useFirebase } from "../../contexts/FirebaseContextType";
 import ActionSheetComponent from "../Sheet/SheetComponent";
+import { CreateReminder, generateAndDownloadICS } from "../../helpers/Calendar";
+import {
+  CapacitorCalendar,
+  CalendarPermissionScope,
+} from "@ebarooni/capacitor-calendar";
+import { Capacitor } from "@capacitor/core";
 const SOADetailsCompoenent: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
@@ -40,6 +49,7 @@ const SOADetailsCompoenent: React.FC = () => {
   const [formData, setFormData] = useState<SOADetails>({
     ...details,
   });
+  const [present] = useIonToast();
   const handleSave = useCallback(async () => {
     if (!db || !userId || !details.id) {
       console.error("Missing db, userId, or document ID");
@@ -104,6 +114,60 @@ const SOADetailsCompoenent: React.FC = () => {
       console.error("Failed to delete SOA:", error);
     }
   };
+  const handleSaveToCalendar = async () => {
+    if (!details.id) {
+      console.error("Missing db, userId, or document ID");
+      return;
+    }
+    const platform = Capacitor.getPlatform();
+    const originalDate = new Date(details.payment_due_date);
+    const startDate = new Date(
+      originalDate.getTime() - 5 * 24 * 60 * 60 * 1000
+    ).getTime();
+    const endDate = new Date(details.payment_due_date).getTime();
+
+    try {
+      if (platform === "ios" || platform === "android") {
+        const hasPermission = await CapacitorCalendar.checkAllPermissions();
+        if (!hasPermission.result) {
+          const permission =
+            await CapacitorCalendar.requestFullCalendarAccess();
+          if (!permission.result) {
+            alert("Permission denied to access calendar");
+            return;
+          }
+        }
+
+        CreateReminder({
+          listId: details.id,
+          title: `${details.bank_name} - ${details.card_number}`,
+          startDate: startDate,
+          completionDate: endDate,
+        });
+      } else if (platform === "web") {
+        // Web fallback: generate .ics file
+        const formatDate = (date: Date) =>
+          date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+        const startDate = new Date(
+          originalDate.getTime() - 5 * 24 * 60 * 60 * 1000
+        );
+        const endDate = new Date(details.payment_due_date);
+        generateAndDownloadICS({
+          listId: details.id,
+          title: `SOA: ${details.bank_name} - ${details.card_number}`,
+          startDate: startDate,
+          completionDate: endDate,
+        });
+        present({
+          message: 'Tap the downloaded file to add the event to your calendar.',
+          duration: 3000,
+          position: 'bottom',
+        });
+      }
+    } catch (error) {
+      console.error("SOA did not save to calendar:", error);
+    }
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -114,7 +178,12 @@ const SOADetailsCompoenent: React.FC = () => {
             </IonButton>
           </IonButtons>
           <IonButtons slot="end">
-            <IonButton fill="clear" id="open-action-sheet">
+            <IonButton fill="clear" id="open-action-calendar">
+              <IonIcon color="primary" icon={calendarClearOutline} />
+            </IonButton>
+          </IonButtons>
+          <IonButtons slot="end">
+            <IonButton fill="clear" id="open-action-delete">
               <IonIcon color="danger" icon={trashBin} />
             </IonButton>
           </IonButtons>
@@ -200,22 +269,39 @@ const SOADetailsCompoenent: React.FC = () => {
           </div>
         </IonItem>
         <ActionSheetComponent
-        trigger="open-action-sheet"
-        header="Are you sure you want to delete?"
-        buttons={[
-          {
-            text: 'Delete',
-            role: 'destructive',
-            data: { action: 'delete' },
-            handler: () => handleDelete(),
-          },
-          {
-            text: 'Cancel',
-            role: 'cancel',
-            data: { action: 'cancel' },
-          },
-        ]}
-      />
+          trigger="open-action-calendar"
+          header="Save this to calendar"
+          buttons={[
+            {
+              text: "Save to Calendar",
+              role: "destructive",
+              data: { action: "save" },
+              handler: () => handleSaveToCalendar(),
+            },
+            {
+              text: "Cancel",
+              role: "cancel",
+              data: { action: "cancel" },
+            },
+          ]}
+        />
+        <ActionSheetComponent
+          trigger="open-action-delete"
+          header="Are you sure you want to delete?"
+          buttons={[
+            {
+              text: "Delete",
+              role: "destructive",
+              data: { action: "delete" },
+              handler: () => handleDelete(),
+            },
+            {
+              text: "Cancel",
+              role: "cancel",
+              data: { action: "cancel" },
+            },
+          ]}
+        />
       </IonContent>
       <IonFooter className="btn-footer">
         <IonToolbar>
