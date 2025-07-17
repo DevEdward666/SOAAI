@@ -16,7 +16,7 @@ import { Redirect, Route } from "react-router";
 
 import  SOADetailsCompoenent  from "./components/Details/SOADetails";
 // Pages
-import Home from "./pages/Home";
+import Home from "./pages/Home/Home";
 
 // Contexts
 import { UserProvider } from "./contexts/UserContext";
@@ -48,6 +48,7 @@ import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
 import { ModalProvider } from "./contexts/ModalContext";
 import { FirebaseProvider } from "./contexts/FirebaseContextType";
+import Profile from "./pages/Profile/Profile";
 
 // Initialize Ionic
 setupIonicReact();
@@ -63,10 +64,12 @@ const App: React.FC = () => (
               <IonRouterOutlet>
                 {/* Main Tab Routes */}
                 <Route exact path="/home" component={Home} />
+                <Route exact path="/profile" component={Profile} />
+
                 <Route exact path="/register" component={Register} />
                 {/* Default Route */}
                 <Route exact path="/">
-                  <Redirect to="/home" />
+                  <Redirect to="/login" />
                 </Route>
               </IonRouterOutlet>
 

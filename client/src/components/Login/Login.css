@@ -1,12 +1,29 @@
 .login-logo {
-    text-align: center;
-    margin: 40px 0;
-  }
-  
-  .login-logo img {
-    max-width: 250px;
-  }
-  
-  form {
-    margin-bottom: 20px;
-  }
+  text-align: center;
+  margin: 40px 0;
+}
+
+.login-logo img {
+  max-width: 250px;
+}
+
+form {
+  margin-bottom: 20px;
+}
+.grid-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+.login-img {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  object-fit: "cover";
+}
+.login-img-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

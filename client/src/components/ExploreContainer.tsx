@@ -66,7 +66,6 @@ const ExploreContainer: React.FC = () => {
   const { db, userId, loading, error } = useFirebase();
   const [segmentValue, setSegmentValue] = useState("pending");
   const [spendingData, setSpendingData] = useState<PieChartSOAData>({ data: [],ChartTitle:"" });
-
   const [showPassword, setShowPassword] = useState(false);
   const handleShowPassword = useCallback(() => {
     if (showPassword) {

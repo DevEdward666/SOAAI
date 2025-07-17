@@ -7,6 +7,7 @@ import {
   IonGrid,
   IonHeader,
   IonIcon,
+  IonImg,
   IonInput,
   IonItem,
   IonLoading,
@@ -14,35 +15,35 @@ import {
   IonRow,
   IonText,
   IonTitle,
-  IonToolbar
-} from '@ionic/react';
-import { lockClosed, logIn, mail, person } from 'ionicons/icons';
-import React, { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+  IonToolbar,
+} from "@ionic/react";
+import { lockClosed, logIn, mail, person } from "ionicons/icons";
+import React, { useState } from "react";
+import { Redirect } from "react-router-dom";
 
 import "./Login.css";
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from "../../contexts/AuthContext";
 const Login: React.FC = () => {
   const { login, isLoading, error, isLoggedIn } = useAuth();
-  
+
   const [credentials, setCredentials] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  
+
   if (isLoggedIn()) {
-    console.log(isLoggedIn())
+    console.log(isLoggedIn());
     return <Redirect to="/home" />;
   }
-  
+
   const handleChange = (e: CustomEvent) => {
     const { name, value } = e.detail.event.target;
     setCredentials({
       ...credentials,
-      [name]: value
+      [name]: value,
     });
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (credentials.email && credentials.password) {
@@ -54,66 +55,67 @@ const Login: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
-          <IonButtons slot="start">
-            <IonBackButton color="light" defaultHref="/home" />
-          </IonButtons>
           <IonTitle>Login</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
-        <IonGrid>
+        <IonGrid className="grid-container">
+          <div className="login-img-container">
+            <IonImg className="login-img" />
+          </div>
           <IonRow className="ion-justify-content-center">
             <IonCol size="12" sizeMd="8" sizeLg="6">
               <div className="login-logo">
-              {/* <img src="/assets/logo.png" alt="PetShop Logo" /> */}
+                {/* <img src="/assets/logo.png" alt="PetShop Logo" /> */}
               </div>
-              
+
               <form onSubmit={handleSubmit}>
                 <IonItem>
                   <IonIcon icon={mail} slot="start" color="primary" />
                   <IonInput
                     type="email"
                     name="email"
-                    placeholder='user@mail.com'
+                    placeholder="user@mail.com"
                     value={credentials.email}
                     onIonChange={handleChange}
                     required
                   />
                 </IonItem>
-                
+
                 <IonItem className="ion-margin-bottom">
                   <IonIcon icon={lockClosed} slot="start" color="primary" />
                   <IonInput
                     type="password"
                     name="password"
-                    placeholder='Password'
+                    placeholder="Password"
                     value={credentials.password}
                     onIonChange={handleChange}
                     required
                   />
                 </IonItem>
-                
+
                 {error && (
                   <IonText color="danger">
                     <p className="ion-text-center">{error}</p>
                   </IonText>
                 )}
-                
-                <IonButton
-                  expand="block"
-                  type="submit"
-                  color="primary"
-                >
+
+                <IonButton expand="block" type="submit" color="primary">
                   <IonIcon slot="start" icon={logIn} />
                   Login
                 </IonButton>
               </form>
-              
+
               <div className="ion-text-center ion-padding-top">
                 <IonText color="medium">
                   <p>Don't have an account yet?</p>
                 </IonText>
-                <IonButton routerLink="/register" expand="block" fill="outline" color="primary">
+                <IonButton
+                  routerLink="/register"
+                  expand="block"
+                  fill="outline"
+                  color="primary"
+                >
                   <IonIcon slot="start" icon={person} />
                   Create Account
                 </IonButton>
@@ -121,10 +123,9 @@ const Login: React.FC = () => {
             </IonCol>
           </IonRow>
         </IonGrid>
-        
+
         {/* <IonLoading isOpen={isLoading()} message="Please wait..." /> */}
       </IonContent>
-      
     </IonPage>
   );
 };
